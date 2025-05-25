@@ -15,14 +15,14 @@ import PaymentPage from "./pages/PaymentPage";
 import CommunitiesShowcase from "@/components/CommunitiesShowcase";
 import CommunityPage from "@/pages/CommunityPage";
 import CommunityDiscord from "./pages/CommunityDiscord";
-import { createElement } from "react";
 
 // Create a client
 const queryClient = new QueryClient();
 
-// Fix the function component syntax
+// Simple App without wallet adapters for testing
 const App = () => {
   console.log("App component is rendering!");
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -30,16 +30,17 @@ const App = () => {
         <Sonner />
         <Router>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<TestIndex />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/anime" element={<AnimeLibrary />} />
-            <Route path="/watch/:animeId" element={<WatchPage />} />
+            <Route path="/watch/:id" element={<WatchPage />} />
             <Route path="/communities" element={<Communities />} />
-            <Route path="/communities/:id" element={<CommunityPage />} />
+            <Route path="/community/:id" element={<CommunityPage />} />
+            <Route path="/community/:id/discord" element={<CommunityDiscord />} />
             <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/community-discord/:communityId" element={<CommunityDiscord />} />
-<Route path="/payment" element={<PaymentPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/communities-showcase" element={<CommunitiesShowcase />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>

@@ -32,7 +32,7 @@ const CommunityFlipCard = ({ community }: CommunityFlipCardProps) => {
       className={`${styles['flip-card']} h-[400px] cursor-pointer w-full`}
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
-      onClick={() => navigate(`/community-discord/${community.name.toLowerCase().replace(/\s+/g, '-')}`)}
+      onClick={() => navigate(`/community/${community.id}/discord`)}
     >
       <div className={`${styles['flip-card-inner']} w-full h-full relative ${isFlipped ? styles['rotate-y-180'] : ''}`}>
         {/* Front Side */}
