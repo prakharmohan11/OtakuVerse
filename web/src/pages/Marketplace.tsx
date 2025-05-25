@@ -1,10 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import useWallet from "@/hooks/useWallet";
+// TODO: Re-enable wallet functionality
+// import useWallet from "@/hooks/useWallet";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowRight, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Dynamic pricing based on rarity
+const getRarityPrice = (rarity: string): number => {
+  const basePrices = {
+    'COMMON': 0.5,
+    'RARE': 1.5,
+    'EPIC': 3.0,
+    'LEGENDARY': 7.5
+  };
+  return basePrices[rarity as keyof typeof basePrices] || 0.5;
+};
 
 // Featured NFTs that will be in the rotating carousel
 const featuredNfts = [
@@ -13,7 +25,8 @@ const featuredNfts = [
     name: "Saitama Genesis",
     anime: "One Punch Man",
     image: "https://preview.redd.it/9esa8cif2ja81.png?width=1080&crop=smart&auto=webp&s=8ec49edea780fcd7b1c12bc6dd26886e7d7b17c4",
-    price: "2.5 SOL",
+    price: `${getRarityPrice("RARE")} SOL`,
+    priceSOL: getRarityPrice("RARE"),
     type: "purchasable",
     rarity: "RARE"
   },
@@ -22,7 +35,8 @@ const featuredNfts = [
     name: "All Might Portrait",
     anime: "My Hero Academia",
     image: "https://i.pinimg.com/236x/e9/b2/45/e9b2453a07b5948aa5d97283d240b42b.jpg",
-    price: "1.52 SOL",
+    price: `${getRarityPrice("EPIC")} SOL`,
+    priceSOL: getRarityPrice("EPIC"),
     type: "purchasable",
     rarity: "EPIC"
   },
@@ -31,16 +45,18 @@ const featuredNfts = [
     name: "Scout Regiment Badge",
     anime: "Attack on Titan",
     image: "https://media.sketchfab.com/models/8812126a43144d85abaae7d88e4d868c/thumbnails/73f4c01a9cfa489f94203b14dfe4520f/cee19a4936a245b29209ed09569afaab.jpeg",
-    price: "Community Reward",
+    price: "Watch 10 Episodes",
     type: "earned",
-    rarity: "LEGENDARY"
+    rarity: "LEGENDARY",
+    watchRequirement: 10
   },
   {
     id: 7,
     name: "Tanjiro's Sword",
     anime: "Demon Slayer",
     image: "https://www.coolkatana.com/cdn/shop/articles/power_of_coolKatana_s_tanjiro_nichirin_sword_9103e7bb-20f1-4f7d-bec5-d43f9e727840.jpg?v=1740042664",
-    price: "1.8 SOL",
+    price: `${getRarityPrice("EPIC")} SOL`,
+    priceSOL: getRarityPrice("EPIC"),
     type: "purchasable",
     rarity: "EPIC"
   }
@@ -53,7 +69,8 @@ const nftCards = [
     name: "Saitama Genesis",
     anime: "One Punch Man",
     image: "https://preview.redd.it/9esa8cif2ja81.png?width=1080&crop=smart&auto=webp&s=8ec49edea780fcd7b1c12bc6dd26886e7d7b17c4",
-    price: "2.5 SOL",
+    price: `${getRarityPrice("RARE")} SOL`,
+    priceSOL: getRarityPrice("RARE"),
     type: "purchasable",
     rarity: "RARE"
   },
@@ -62,7 +79,8 @@ const nftCards = [
     name: "All Might Portrait",
     anime: "My Hero Academia",
     image: "https://i.pinimg.com/236x/e9/b2/45/e9b2453a07b5948aa5d97283d240b42b.jpg",
-    price: "1.52 SOL",
+    price: `${getRarityPrice("EPIC")} SOL`,
+    priceSOL: getRarityPrice("EPIC"),
     type: "purchasable",
     rarity: "EPIC"
   },
@@ -71,34 +89,38 @@ const nftCards = [
     name: "Scout Regiment Badge",
     anime: "Attack on Titan",
     image: "https://media.sketchfab.com/models/8812126a43144d85abaae7d88e4d868c/thumbnails/73f4c01a9cfa489f94203b14dfe4520f/cee19a4936a245b29209ed09569afaab.jpeg",
-    price: "Community Reward",
+    price: "Watch 15 Episodes",
     type: "earned",
-    rarity: "LEGENDARY"
+    rarity: "LEGENDARY",
+    watchRequirement: 15
   },
   {
     id: 4,
     name: "Genos Cyborg Core",
     anime: "One Punch Man",
     image: "https://i.redd.it/vyilsxvkyhn91.jpg",
-    price: "Community Reward",
+    price: "Watch 20 Episodes",
     type: "earned",
-    rarity: "LEGENDARY"
+    rarity: "LEGENDARY",
+    watchRequirement: 20
   },
   {
     id: 5,
     name: "Speed-o'-Sound Sonic Shadow",
     anime: "One Punch Man",
     image: "https://w0.peakpx.com/wallpaper/269/864/HD-wallpaper-speed-o-sound-sonic-aesthetic-anime-art-blue-edit-electric-glow-lightning-one-punch-man.jpg",
-    price: "Community Reward",
+    price: "Watch 8 Episodes",
     type: "earned",
-    rarity: "EPIC"
+    rarity: "EPIC",
+    watchRequirement: 8
   },
   {
     id: 6,
     name: "Mumen Rider Justice",
     anime: "One Punch Man",
     image: "https://wallpapers.com/images/hd/mumen-rider-1280-x-854-wallpaper-iba0xjxkf7ebqjfc.jpg",
-    price: "0.8 SOL",
+    price: `${getRarityPrice("COMMON")} SOL`,
+    priceSOL: getRarityPrice("COMMON"),
     type: "purchasable",
     rarity: "COMMON"
   },
@@ -116,7 +138,9 @@ const nftCards = [
 // NFT Card component that displays differently based on if it's purchasable or earned
 const NFTCard = ({ card }: { card: any }) => {
   const navigate = useNavigate();
-  const { connected } = useWallet();
+  // TODO: Re-enable wallet functionality
+  // const { connected } = useWallet();
+  const connected = false; // Mock wallet state for debugging
   const [showWalletNotif, setShowWalletNotif] = useState(false);
 
   const handlePurchase = () => {

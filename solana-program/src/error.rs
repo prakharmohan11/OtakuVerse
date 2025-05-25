@@ -34,4 +34,60 @@ pub enum OtakuVerseError {
     /// Community not found
     #[msg("Community not found")]
     CommunityNotFound,
+
+    /// Name is too long
+    #[msg("Name is too long")]
+    NameTooLong,
+
+    /// Symbol is too long
+    #[msg("Symbol is too long")]
+    SymbolTooLong,
+
+    /// URI is too long
+    #[msg("URI is too long")]
+    UriTooLong,
+
+    /// Description is too long
+    #[msg("Description is too long")]
+    DescriptionTooLong,
+
+    /// Invalid royalty percentage
+    #[msg("Invalid royalty percentage")]
+    InvalidRoyalty,
+
+    /// NFT is not for sale
+    #[msg("NFT is not for sale")]
+    NFTNotForSale,
+
+    /// Cannot buy your own NFT
+    #[msg("Cannot buy your own NFT")]
+    CannotBuyOwnNFT,
+
+    /// Insufficient watch time for reward
+    #[msg("Insufficient watch time for reward")]
+    InsufficientWatchTime,
+
+    /// Invalid price
+    #[msg("Invalid price")]
+    InvalidPrice,
+
+    /// Already a member of this community
+    #[msg("Already a member of this community")]
+    AlreadyMember,
+
+    /// Not a member of this community
+    #[msg("Not a member of this community")]
+    NotMember,
+
+    /// Message content is too long
+    #[msg("Message content is too long")]
+    MessageTooLong,
+
+    /// Invalid collection
+    #[msg("Invalid collection")]
+    InvalidCollection,
+
+    /// NFT transfer failed
+    #[msg("NFT transfer failed")]
+    TransferFailed,
 }

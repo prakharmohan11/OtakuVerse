@@ -1,7 +1,8 @@
 
 import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+// TODO: Re-enable Clerk authentication
+// import { useAuth } from "@clerk/clerk-react";
 import { toast } from "@/components/ui/sonner";
 
 interface AnimeCardProps {
@@ -17,7 +18,11 @@ interface AnimeCardProps {
 
 const AnimeCard = ({ anime }: AnimeCardProps) => {
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  // TODO: Re-enable Clerk authentication
+  // const { isSignedIn } = useAuth();
+  
+  // Mock authentication state for debugging
+  const isSignedIn = true;
   return (
     <div className="anime-card group">
       <div className="relative overflow-hidden aspect-[3/4]">

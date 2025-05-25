@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import { toast } from '@/components/ui/sonner'; // Adjust path if needed
-import { useUser } from '@clerk/clerk-react';
+// TODO: Re-enable Clerk authentication
+// import { useUser } from '@clerk/clerk-react';
 import ComingSoonModal from '@/components/ComingSoonModal';
 import { Link } from 'react-router-dom';
 import { 
@@ -12,12 +13,13 @@ import Navbar from '@/components/Navbar';
 
 const Dashboard = () => {
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
-  const { user } = useUser();
+  // TODO: Re-enable Clerk authentication
+  // const { user } = useUser();
 
-  // Fallbacks if user is not loaded
-  const userName = user?.fullName || 'Anime Fan';
-  const userProfileImage = user?.imageUrl || 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200';
-  const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'May 2025';
+  // Temporary mock user data for debugging
+  const userName = 'Anime Fan (Demo)';
+  const userProfileImage = 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200';
+  const joinedDate = 'May 2025';
 
   // Stats - set to zero as per requirements
   const watchTime = '0h 0m';

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SignInButton, useAuth } from "@clerk/clerk-react";
+// Temporarily disable Clerk for debugging
+// import { SignInButton, useAuth } from "@clerk/clerk-react";
 import {
   Dialog as UIDialog,
   DialogTrigger,
@@ -10,23 +11,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+// Temporarily disable wallet imports for debugging
+// import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import ComingSoonModal from "./ComingSoonModal";
+// import useWallet from "@/hooks/useWallet";
 
 // WalletInfoModal component for wallet connection UI
 const WalletInfoModal = () => {
   const [open, setOpen] = useState(false);
-  const [walletConnected] = useState(true); // Set to true to show modal trigger
-  const [walletAddress] = useState("5a2d...9F3C");
+  // Temporarily disable wallet for debugging
+  // const { connected, address, formattedAddress, walletName, disconnect, error } = useWallet();
+  const connected = false;
+  const address = "";
+  const formattedAddress = "";
+  const walletName = "";
+  const disconnect = () => {};
+  const error = null;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(walletAddress);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    }
   };
 
-  if (!walletConnected) return null;
+  const handleDisconnect = async () => {
+    try {
+      await disconnect();
+      setOpen(false);
+    } catch (err) {
+      console.error('Failed to disconnect wallet:', err);
+    }
+  };
+
+  if (!connected) return null;
 
   return (
     <UIDialog open={open} onOpenChange={setOpen}>
@@ -43,9 +63,15 @@ const WalletInfoModal = () => {
           <DialogTitle className="text-center">Wallet Connected</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-2 w-full">
-          <span className="text-sm font-mono bg-otaku-dark px-3 py-2 rounded-lg border border-otaku-blue/40 mb-2">
-            {walletAddress}
-          </span>
+          <div className="text-center mb-2">
+            <p className="text-sm text-gray-500 mb-1">{walletName} Wallet</p>
+            <span className="text-sm font-mono bg-otaku-dark px-3 py-2 rounded-lg border border-otaku-blue/40">
+              {formattedAddress}
+            </span>
+          </div>
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
           <Button
             onClick={handleCopy}
             className="w-full flex items-center gap-2 bg-otaku-blue hover:bg-otaku-purple-vivid text-white font-cyber"
@@ -53,10 +79,10 @@ const WalletInfoModal = () => {
             <Copy className="w-4 h-4" />
             {copied ? "Copied!" : "Copy Address"}
           </Button>
-          <Button className="w-full bg-otaku-pink hover:bg-otaku-blue text-white font-cyber mt-2">
-            Change Wallet
-          </Button>
-          <Button className="w-full bg-otaku-dark border border-otaku-pink text-otaku-pink hover:bg-otaku-pink/10 font-cyber mt-2">
+          <Button 
+            onClick={handleDisconnect}
+            className="w-full bg-otaku-dark border border-otaku-pink text-otaku-pink hover:bg-otaku-pink/10 font-cyber mt-2"
+          >
             Disconnect
           </Button>
         </div>
@@ -67,7 +93,10 @@ const WalletInfoModal = () => {
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isSignedIn, signOut } = useAuth();
+  // Temporarily disable Clerk for debugging
+  // const { isSignedIn, signOut } = useAuth();
+  const isSignedIn = false;
+  const signOut = () => {};
 
   const [showComingSoon, setShowComingSoon] = useState(false);
   const handleCreatorStudioClick = (e: React.MouseEvent) => {
@@ -144,12 +173,12 @@ const Navbar = () => {
                   <DialogHeader>
                     <DialogTitle className="text-center">Login</DialogTitle>
                   </DialogHeader>
-                  <SignInButton mode="modal">
-                    <Button className="w-full bg-otaku-purple hover:bg-otaku-purple-vivid text-white font-cyber">
-                      Login with Google
-                    </Button>
-                  </SignInButton>
-                  <WalletMultiButton className="w-full bg-otaku-blue hover:bg-otaku-purple-vivid text-white font-cyber" />
+                  <Button className="w-full bg-otaku-purple hover:bg-otaku-purple-vivid text-white font-cyber" disabled>
+                    Login with Google (Disabled)
+                  </Button>
+                  <Button className="w-full bg-otaku-blue hover:bg-otaku-purple-vivid text-white font-cyber" disabled>
+                    Connect Wallet (Disabled)
+                  </Button>
                 </DialogContent>
               </UIDialog>
             )}
@@ -213,14 +242,13 @@ const Navbar = () => {
                     Logout
                   </Button>
                 ) : (
-                  <SignInButton mode="modal">
-                    <Button
-                      variant="outline"
-                      className="w-full border-otaku-blue text-otaku-blue hover:bg-otaku-blue/20 font-cyber"
-                    >
-                      Login
-                    </Button>
-                  </SignInButton>
+                  <Button
+                    variant="outline"
+                    className="w-full border-otaku-blue text-otaku-blue hover:bg-otaku-blue/20 font-cyber"
+                    disabled
+                  >
+                    Login (Disabled)
+                  </Button>
                 )}
               </div>
             </div>

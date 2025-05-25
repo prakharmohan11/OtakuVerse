@@ -31,29 +31,35 @@ impl NFTRarity {
 }
 
 /// NFT attribute structure
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq, InitSpace)]
 pub struct NFTAttribute {
     /// The trait type
+    #[max_len(32)]
     pub trait_type: String,
     /// The value of the trait
+    #[max_len(64)]
     pub value: String,
 }
 
 /// NFT data structure
 #[account]
-#[derive(Debug)]
+#[derive(Debug, InitSpace)]
 pub struct NFTData {
     /// The mint address of the NFT
     pub mint: Pubkey,
     /// The owner of the NFT
     pub owner: Pubkey,
     /// The name of the NFT
+    #[max_len(32)]
     pub name: String,
     /// The symbol of the NFT
+    #[max_len(10)]
     pub symbol: String,
     /// The URI pointing to the NFT metadata
+    #[max_len(200)]
     pub uri: String,
     /// The anime title associated with the NFT
+    #[max_len(50)]
     pub anime_title: String,
     /// The rarity of the NFT
     pub rarity: NFTRarity,
@@ -66,10 +72,12 @@ pub struct NFTData {
     /// The creator of the NFT
     pub creator: Pubkey,
     /// The description of the NFT
+    #[max_len(500)]
     pub description: String,
     /// The collection ID this NFT belongs to (if any)
     pub collection_id: Option<Pubkey>,
     /// The attributes of the NFT
+    #[max_len(10)]
     pub attributes: Vec<NFTAttribute>,
     /// The royalty percentage for secondary sales (in basis points, e.g. 250 = 2.5%)
     pub royalty_basis_points: u16,

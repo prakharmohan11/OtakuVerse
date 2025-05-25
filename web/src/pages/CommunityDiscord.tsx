@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft, Hash, Users, Mic, Headphones, Settings, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Hash, Users, Mic, Headphones, Settings, MessageSquare, Shield, Wallet } from 'lucide-react';
+// TODO: Re-enable wallet functionality
+// import useWallet from '../hooks/useWallet';
+import { toast } from 'sonner';
 
 // Example channel and message data
 const channels = [
@@ -29,6 +32,13 @@ const initialMessages = [
 
 const CommunityDiscord: React.FC = () => {
   const { communityId } = useParams();
+  // TODO: Re-enable wallet functionality
+  // const { connected: isConnected, connect: connectWallet, address } = useWallet();
+  
+  // Mock wallet state for debugging
+  const isConnected = false;
+  const connectWallet = () => toast.info("Wallet connection disabled for debugging");
+  const address = null;
   const [activeChannel, setActiveChannel] = React.useState(() => {
     return channels.find(ch => ch.id === communityId) ? communityId : channels[0].id;
   });
@@ -37,21 +47,71 @@ const CommunityDiscord: React.FC = () => {
   // Message state
   const [messages, setMessages] = React.useState(initialMessages);
   const [input, setInput] = React.useState("");
+  const [isJoined, setIsJoined] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Join community handler
+  const joinCommunity = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Simulate blockchain transaction for joining community
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsJoined(true);
+      toast.success('Successfully joined the community!');
+      
+      // Add welcome message
+      setMessages(prev => [
+        ...prev,
+        {
+          user: 'System',
+          avatar: '/avatars/system.png',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          content: `Welcome! You've successfully joined this decentralized community.`,
+          bot: true
+        }
+      ]);
+    } catch (error) {
+      toast.error('Failed to join community');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Send message handler
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (input.trim() === "") return;
-    setMessages(prev => [
-      ...prev,
-      {
-        user: 'You',
-        avatar: '/avatars/default-user.png',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        content: input,
-        bot: false
-      }
-    ]);
+    if (!isConnected) {
+      toast.error('Please connect your wallet to send messages');
+      return;
+    }
+    if (!isJoined) {
+      toast.error('Please join the community first');
+      return;
+    }
+
+    const newMessage = {
+      user: wallet?.publicKey?.toString().slice(0, 8) + '...' || 'You',
+      avatar: '/avatars/default-user.png',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      content: input,
+      bot: false
+    };
+
+    setMessages(prev => [...prev, newMessage]);
     setInput("");
+
+    // Simulate blockchain message storage
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      toast.success('Message sent to blockchain');
+    } catch (error) {
+      toast.error('Failed to store message on blockchain');
+    }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -100,9 +160,37 @@ const CommunityDiscord: React.FC = () => {
       {/* Chat Area */}
       <main className="flex-1 flex flex-col bg-[#23204a]/80">
         {/* Header */}
-        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#2a1d4e]/40 bg-[#23204a]/90 shadow">
-          <Hash size={22} className="text-[#14F194]" />
-          <span className="font-bold text-xl">{activeChannelObj.name}</span>
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[#2a1d4e]/40 bg-[#23204a]/90 shadow">
+          <div className="flex items-center gap-3">
+            <Hash size={22} className="text-[#14F194]" />
+            <span className="font-bold text-xl">{activeChannelObj.name}</span>
+            <Shield size={18} className="text-[#934EFB]" title="Decentralized & Secure" />
+          </div>
+          <div className="flex items-center gap-3">
+            {!isConnected ? (
+              <button
+                onClick={connectWallet}
+                className="flex items-center gap-2 bg-gradient-to-r from-[#934EFB] to-[#14F194] px-4 py-2 rounded-lg font-bold text-[#18122B] hover:from-[#14F194] hover:to-[#934EFB] transition-all"
+              >
+                <Wallet size={16} />
+                Connect Wallet
+              </button>
+            ) : !isJoined ? (
+              <button
+                onClick={joinCommunity}
+                disabled={isLoading}
+                className="flex items-center gap-2 bg-gradient-to-r from-[#14F194] to-[#934EFB] px-4 py-2 rounded-lg font-bold text-[#18122B] hover:from-[#934EFB] hover:to-[#14F194] transition-all disabled:opacity-50"
+              >
+                <Users size={16} />
+                {isLoading ? 'Joining...' : 'Join Community'}
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 text-[#14F194]">
+                <Users size={16} />
+                <span className="font-medium">Member</span>
+              </div>
+            )}
+          </div>
         </header>
         {/* Messages */}
         <section className="flex-1 overflow-y-auto px-8 py-6 space-y-6">

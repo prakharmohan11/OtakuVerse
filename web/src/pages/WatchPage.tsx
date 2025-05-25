@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+// TODO: Re-enable Clerk authentication and wallet functionality
+// import { useAuth } from '@clerk/clerk-react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ChevronLeft,
-  Heart, Share2, Plus
+  Heart, Share2, Plus, Gift, Trophy, Star
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+// import useWallet from '../hooks/useWallet';
 
 interface Episode {
   id: number;
@@ -16,7 +18,13 @@ interface Episode {
 }
 
 const WatchPage = (): JSX.Element => {
-  const { isSignedIn } = useAuth();
+  // TODO: Re-enable authentication and wallet functionality
+  // const { isSignedIn } = useAuth();
+  // const { connected: isConnected } = useWallet();
+  
+  // Mock authentication and wallet state for debugging
+  const isSignedIn = true; // Allow watching for debugging
+  const isConnected = false;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,9 +52,14 @@ const WatchPage = (): JSX.Element => {
       navigate('/anime', { replace: true });
     }
   }, [isSignedIn, navigate]);
+  
   const { animeId } = useParams<{ animeId: string }>();
   const [currentEpisode, setCurrentEpisode] = useState<number>(0);
   const [earnedTokens, setEarnedTokens] = useState<number>(0);
+  const [watchedEpisodes, setWatchedEpisodes] = useState<Set<number>>(new Set());
+  const [availableNFTs, setAvailableNFTs] = useState<any[]>([]);
+  const [showNFTReward, setShowNFTReward] = useState(false);
+  const [rewardedNFT, setRewardedNFT] = useState<any>(null);
 
   // Episode lists for each anime
   const onePunchManEpisodes: Episode[] = [
@@ -205,6 +218,34 @@ const WatchPage = (): JSX.Element => {
     setCurrentEpisode(0);
   }, [animeId]);
 
+  // NFT rewards based on episodes watched
+  const nftRewards = [
+    {
+      id: 'watch_5',
+      name: 'Anime Enthusiast Badge',
+      image: 'https://i.pinimg.com/236x/e9/b2/45/e9b2453a07b5948aa5d97283d240b42b.jpg',
+      requirement: 5,
+      rarity: 'COMMON',
+      description: 'Awarded for watching 5 episodes'
+    },
+    {
+      id: 'watch_10',
+      name: 'Otaku Warrior',
+      image: 'https://preview.redd.it/9esa8cif2ja81.png?width=1080&crop=smart&auto=webp&s=8ec49edea780fcd7b1c12bc6dd26886e7d7b17c4',
+      requirement: 10,
+      rarity: 'RARE',
+      description: 'Awarded for watching 10 episodes'
+    },
+    {
+      id: 'watch_20',
+      name: 'Legendary Viewer',
+      image: 'https://media.sketchfab.com/models/8812126a43144d85abaae7d88e4d868c/thumbnails/73f4c01a9cfa489f94203b14dfe4520f/cee19a4936a245b29209ed09569afaab.jpeg',
+      requirement: 20,
+      rarity: 'LEGENDARY',
+      description: 'Awarded for watching 20 episodes'
+    }
+  ];
+
   useEffect(() => {
     // Simulate earning tokens while watching
     const interval = setInterval(() => {
@@ -213,6 +254,60 @@ const WatchPage = (): JSX.Element => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Handle episode completion and NFT rewards
+  const handleEpisodeComplete = async (episodeIndex: number) => {
+    if (!watchedEpisodes.has(episodeIndex)) {
+      const newWatchedEpisodes = new Set(watchedEpisodes);
+      newWatchedEpisodes.add(episodeIndex);
+      setWatchedEpisodes(newWatchedEpisodes);
+
+      // Check for NFT rewards
+      const watchCount = newWatchedEpisodes.size;
+      const eligibleNFT = nftRewards.find(nft => 
+        nft.requirement === watchCount && !availableNFTs.some(available => available.id === nft.id)
+      );
+
+      if (eligibleNFT && isConnected) {
+        setRewardedNFT(eligibleNFT);
+        setShowNFTReward(true);
+        setAvailableNFTs(prev => [...prev, eligibleNFT]);
+        
+        // Simulate blockchain NFT minting
+        try {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          toast(`🎉 NFT Reward Earned: ${eligibleNFT.name}!`, {
+            duration: 5000,
+            style: {
+              background: 'linear-gradient(90deg, #934EFB 0%, #14F194 100%)',
+              color: '#fff',
+              fontWeight: 'bold',
+            }
+          });
+        } catch (error) {
+          toast.error('Failed to mint NFT reward');
+        }
+      } else if (eligibleNFT && !isConnected) {
+        toast('Connect your wallet to earn NFT rewards!', {
+          duration: 4000,
+          style: {
+            background: 'linear-gradient(90deg, #FF6B6B 0%, #FFE66D 100%)',
+            color: '#000',
+            fontWeight: 'bold',
+          }
+        });
+      }
+    }
+  };
+
+  // Simulate episode completion after 30 seconds of watching
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleEpisodeComplete(currentEpisode);
+    }, 30000); // 30 seconds
+
+    return () => clearTimeout(timer);
+  }, [currentEpisode, watchedEpisodes, isConnected]);
 
   return (
     <div className="min-h-screen bg-otaku-dark text-white">
@@ -288,10 +383,98 @@ const WatchPage = (): JSX.Element => {
                 <h3 className={`truncate font-medium ${currentEpisode === index ? 'text-otaku-purple' : ''}`}>{episode.title}</h3>
                 <p className="text-xs text-gray-400">{episode.duration}</p>
               </div>
+              {watchedEpisodes.has(index) && (
+                <div className="text-green-400">
+                  <Star size={16} fill="currentColor" />
+                </div>
+              )}
             </div>
           ))}
+          
+          {/* NFT Progress Section */}
+          <div className="mt-6 p-4 bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-lg border border-purple-500/30">
+            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+              <Trophy className="text-yellow-400" size={20} />
+              NFT Rewards
+            </h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Episodes Watched:</span>
+                <span className="font-bold text-green-400">{watchedEpisodes.size}</span>
+              </div>
+              {nftRewards.map((nft) => (
+                <div key={nft.id} className="flex items-center justify-between text-xs">
+                  <span className={`${watchedEpisodes.size >= nft.requirement ? 'text-green-400' : 'text-gray-400'}`}>
+                    {nft.name}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`${watchedEpisodes.size >= nft.requirement ? 'text-green-400' : 'text-gray-400'}`}>
+                      {Math.min(watchedEpisodes.size, nft.requirement)}/{nft.requirement}
+                    </span>
+                    {availableNFTs.some(available => available.id === nft.id) && (
+                      <Gift className="text-yellow-400" size={14} />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {!isConnected && (
+              <div className="mt-3 p-2 bg-yellow-900/30 border border-yellow-500/50 rounded text-xs text-yellow-200">
+                Connect wallet to earn NFT rewards!
+              </div>
+            )}
+          </div>
         </aside>
       </div>
+
+      {/* NFT Reward Modal */}
+      {showNFTReward && rewardedNFT && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-purple-900 to-blue-900 rounded-2xl p-8 max-w-md w-full border border-purple-500/50 shadow-2xl">
+            <div className="text-center">
+              <div className="mb-4">
+                <Gift className="mx-auto text-yellow-400 mb-2" size={48} />
+                <h2 className="text-2xl font-bold text-white mb-2">NFT Reward Earned!</h2>
+              </div>
+              
+              <div className="mb-6">
+                <img 
+                  src={rewardedNFT.image} 
+                  alt={rewardedNFT.name}
+                  className="w-32 h-32 mx-auto rounded-lg object-cover border-2 border-yellow-400 shadow-lg"
+                />
+                <h3 className="text-xl font-bold text-white mt-3">{rewardedNFT.name}</h3>
+                <p className="text-gray-300 text-sm mt-1">{rewardedNFT.description}</p>
+                <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold ${
+                  rewardedNFT.rarity === 'LEGENDARY' ? 'bg-yellow-500 text-black' :
+                  rewardedNFT.rarity === 'RARE' ? 'bg-blue-500 text-white' :
+                  'bg-gray-500 text-white'
+                }`}>
+                  {rewardedNFT.rarity}
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowNFTReward(false)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                >
+                  Awesome!
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNFTReward(false);
+                    navigate('/marketplace');
+                  }}
+                  className="w-full bg-transparent border border-purple-500 hover:bg-purple-500/20 text-white font-bold py-2 px-6 rounded-lg transition-all"
+                >
+                  View in Marketplace
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
